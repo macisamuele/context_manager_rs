@@ -1,0 +1,7 @@
+error: #[async_wrap] cannot operate on sync functions. Please consider using a #[wrap] macro or converting/wrapping the function to be async.
+  --> tests/ui/fail/async_macro_sync_function.rs:12:1
+   |
+12 | #[async_wrap(Async)]
+   | ^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `async_wrap` (in Nightly builds, run with -Z macro-backtrace for more info)

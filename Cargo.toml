@@ -1,0 +1,11 @@
+[workspace]
+resolver = "2"
+
+members = [
+    "context_manager",
+    "context_manager_macro",
+]
+
+[patch.crates-io]
+context_manager = { path = "context_manager" }
+context_manager_macro = { path = "context_manager_macro" }

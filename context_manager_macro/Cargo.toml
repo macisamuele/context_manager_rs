@@ -1,0 +1,16 @@
+[package]
+name = "context_manager_macro"
+version = "0.1.0"
+edition = "2021"
+description = "Process macro for context_manager crate"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/macisamuele/context_manager_rs"
+documentation = "https://docs.rs/context_manager_macro"
+readme = "../README.md"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = {version = "2", features = ["full"] }
+quote = "1"

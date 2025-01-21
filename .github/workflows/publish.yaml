@@ -1,0 +1,42 @@
+name: Build and test
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch: {}
+  push:
+    tags:
+    - v*
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: full
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Verify
+      # Version between context manager and context manager macro should be the same
+      # And it should match the version on the tag
+      run: |
+        versions="$(cargo metadata --format-version=1 | jq -r '.packages[] | select((.name == "context_manager") or (.name == "context_manager_macro")) | .version' | sort -u)"
+        if [ "$(echo "${versions}" | wc -l)" -ne 1 ]; then
+          echo "Version mismatch between context_manager and context_manager_macro"
+          exit 1
+        fi
+        if [ "v$(echo "${versions}" | head -n 1)" != "${GITHUB_REF_NAME}" ]; then
+          echo "Version mismatch between the tag (${GITHUB_REF_NAME}) and the Cargo.toml (${versions})"
+          exit 1
+        fi
+    - name: Publish context_manager_macros to crates.io
+      env:
+        CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+      run: cargo publish --package context_manager_macros
+    - name: Publish context_manager to crates.io
+      env:
+        CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+      run: cargo publish --package context_manager

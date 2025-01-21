@@ -1,0 +1,7 @@
+error: #[wrap] cannot operate on const functions.
+  --> tests/ui/fail/sync_macro_sync_const_function.rs:11:1
+   |
+11 | #[wrap(Sync)]
+   | ^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `wrap` (in Nightly builds, run with -Z macro-backtrace for more info)
