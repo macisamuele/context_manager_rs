@@ -1,6 +1,6 @@
 [package]
 name = "context_manager_macro"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Process macro for context_manager crate"
 license = "MIT OR Apache-2.0"

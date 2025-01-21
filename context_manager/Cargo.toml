@@ -1,6 +1,6 @@
 [package]
 name = "context_manager"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Python's like context_managers in Rust"
 license = "MIT OR Apache-2.0"
@@ -9,7 +9,7 @@ documentation = "https://docs.rs/context_manager_macro"
 readme = "README.md"
 
 [dependencies]
-context_manager_macro = "=0.1.0"
+context_manager_macro = "=0.1.1"
 
 [dev-dependencies]
 tokio = {version = "1", features = ["macros", "rt", "rt-multi-thread"] }

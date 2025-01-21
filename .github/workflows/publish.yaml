@@ -32,10 +32,10 @@ jobs:
           echo "Version mismatch between the tag (${GITHUB_REF_NAME}) and the Cargo.toml (${versions})"
           exit 1
         fi
-    - name: Publish context_manager_macros to crates.io
+    - name: Publish context_manager_macro to crates.io
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
-      run: cargo publish --package context_manager_macros
+      run: cargo publish --package context_manager_macro
     - name: Publish context_manager to crates.io
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}

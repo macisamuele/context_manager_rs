@@ -13,6 +13,7 @@
 // This makes easy to have a proper home for the github project as well as
 // ensuring that the content is always up to date and tested
 #![doc = include_str!("../README.md")]
+//!
 #![doc = include_str!("../CHANGELOG.md")]
 
 mod t_async;
