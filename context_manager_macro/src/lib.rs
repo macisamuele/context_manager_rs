@@ -65,17 +65,21 @@ pub fn wrap(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let context_type = &args.context_type;
     let block = &in_func.block;
+
+    let ident = in_func.sig.ident.to_string();
+    let caller_context = quote! { ::context_manager::CallerContext::new(#ident) };
+
     let new_body: TokenStream = if in_func.sig.asyncness.is_some() {
         quote! {
             {
-                <#context_type as ::context_manager::SyncWrapContext<_>>::run_async(async #block).await
+                <#context_type as ::context_manager::SyncWrapContext<_>>::run_async(#caller_context, async #block).await
             }
         }
         .into()
     } else {
         quote! {
             {
-                <#context_type as ::context_manager::SyncWrapContext<_>>::run_sync(move || #block)
+                <#context_type as ::context_manager::SyncWrapContext<_>>::run_sync(#caller_context, move || #block)
             }
         }
         .into()
@@ -112,9 +116,12 @@ pub fn async_wrap(attr: TokenStream, item: TokenStream) -> TokenStream {
     let context_type = &args.context_type;
     let block = &in_func.block;
     if in_func.sig.asyncness.is_some() {
+        let ident = in_func.sig.ident.to_string();
+        let caller_context = quote! { ::context_manager::CallerContext::new(#ident) };
+
         let new_body: TokenStream = quote! {
             {
-                <#context_type as ::context_manager::AsyncWrapContext<_>>::run(async #block).await
+                <#context_type as ::context_manager::AsyncWrapContext<_>>::run(#caller_context, async #block).await
             }
         }
         .into();

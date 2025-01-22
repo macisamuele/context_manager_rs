@@ -20,7 +20,29 @@ mod t_async;
 mod t_sync;
 pub use crate::t_async::AsyncWrapContext;
 pub use crate::t_sync::SyncWrapContext;
-// TODO: Try to find a way to fix `AsyncWrapContext` links in doc
+
+/// Context about the caller propagated into the context.
+#[derive(Debug)]
+#[non_exhaustive]
+pub struct CallerContext {
+    /// Name of the wrapped function
+    fn_name: &'static str,
+}
+
+impl CallerContext {
+    /// Create a new instance of the `CallerContext`
+    #[must_use]
+    pub fn new(fn_name: &'static str) -> Self {
+        Self { fn_name }
+    }
+
+    /// Name of the wrapped function
+    #[must_use]
+    pub fn fn_name(&self) -> &str {
+        self.fn_name
+    }
+}
+
 /// Procedural macro that will decorate the incoming async function with the provided context.
 ///
 /// The context is expected to be a type that implements the `AsyncWrapContext` trait.
@@ -47,13 +69,13 @@ pub use crate::t_sync::SyncWrapContext;
 /// The decorator will expand the incoming function by adding the context handling
 /// rendering something similar to
 /// ```
-/// # use context_manager::AsyncWrapContext;
+/// # use context_manager::{AsyncWrapContext, CallerContext};
 /// # struct AsyncPrintDuration;
 /// # impl<T> AsyncWrapContext<T> for AsyncPrintDuration {
 /// #   async fn new() -> Self { Self }
 /// # }
 /// async fn foo<'a, T>(int_value: usize, str_ref: &'a str, generic: T) -> usize {
-///     AsyncPrintDuration::run(async {
+///     AsyncPrintDuration::run(CallerContext { fn_name: "foo" }, async {
 ///         let type_name = std::any::type_name::<T>();
 ///         println!("Async call with int_value={int_value}, str_ref={str_ref}, type_of(T)={type_name}");
 ///         10
@@ -144,13 +166,13 @@ pub use context_manager_macro::async_wrap;
 /// The decorator will expand the incoming function by adding the context handling
 /// rendering something similar to
 /// ```
-/// # use context_manager::SyncWrapContext;
+/// # use context_manager::{CallerContext, SyncWrapContext};
 /// # struct PrintDuration;
 /// # impl<T> SyncWrapContext<T> for PrintDuration {
 /// #   fn new() -> Self { Self }
 /// # }
 /// fn sync_foo<'a, T>(int_value: usize, str_ref: &'a str, generic: T) -> usize {
-///     PrintDuration::run_sync(move || {
+///     PrintDuration::run_sync(CallerContext { fn_name: "sync_foo" }, move || {
 ///         let type_name = std::any::type_name::<T>();
 ///         println!("Sync call with int_value={int_value}, str_ref={str_ref}, type_of(T)={type_name}");
 ///         10
@@ -158,7 +180,7 @@ pub use context_manager_macro::async_wrap;
 /// }
 ///
 /// async fn async_foo<'a, T>(int_value: usize, str_ref: &'a str, generic: T) -> usize {
-///     PrintDuration::run_async(async {
+///     PrintDuration::run_async(CallerContext { fn_name: "async_foo" }, async {
 ///         let type_name = std::any::type_name::<T>();
 ///         println!("Async call with int_value={int_value}, str_ref={str_ref}, type_of(T)={type_name}");
 ///         10

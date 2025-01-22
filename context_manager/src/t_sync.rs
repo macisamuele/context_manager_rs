@@ -1,5 +1,6 @@
 use std::future::Future;
 
+use crate::CallerContext;
 #[cfg(doc)] // Imports needed only for doc purposes
 use crate::{wrap, AsyncWrapContext};
 
@@ -31,17 +32,17 @@ use crate::{wrap, AsyncWrapContext};
 ///
 /// or via the [`SyncWrapContext::run_sync`] and [`SyncWrapContext::run_async`] associated functions.
 /// ```
-/// # use context_manager::SyncWrapContext;
+/// # use context_manager::{CallerContext, SyncWrapContext};
 /// struct PrintDuration;
 /// impl<T> SyncWrapContext<T> for PrintDuration {
 ///   fn new() -> Self { Self }
 /// }
 ///
 /// # async fn foo() {
-/// let sync_run_output: &'static str = PrintDuration::run_sync(|| {
+/// let sync_run_output: &'static str = PrintDuration::run_sync(CallerContext::new("manual"), || {
 ///     "sync"
 /// });
-/// let async_run_output: &'static str = PrintDuration::run_async(async {
+/// let async_run_output: &'static str = PrintDuration::run_async(CallerContext::new("manual"), async {
 ///     "async"
 /// }).await;
 /// # }
@@ -54,11 +55,19 @@ pub trait SyncWrapContext<T> {
         Self: Sized;
 
     /// Execute the code before the execution of the wrapped body
-    fn before(&self) {}
+    ///
+    /// Parameters:
+    /// - `caller_context`: Context of the caller (including the name of the function that is being wrapped)
+    #[allow(unused_variables)]
+    fn before(&self, caller_context: &CallerContext) {}
 
     /// Execute the code after the execution of the wrapped body, it provides also the result of the wrapped body
+    ///
+    /// Parameters:
+    /// - `caller_context`: Context of the caller (including the name of the function that is being wrapped)
+    /// - `result`: The result of the wrapped body
     #[allow(unused_variables)]
-    fn after(self, result: &T)
+    fn after(self, caller_context: &CallerContext, result: &T)
     where
         Self: Sized,
     {
@@ -67,28 +76,33 @@ pub trait SyncWrapContext<T> {
     /// Execute a synchronous block of code wrapped by the context
     ///
     /// This will lead to context initialisation and execution of before/after hooks
+    ///
+    /// Parameters:
+    /// - `caller_context`: Context of the caller (including the name of the function that is being wrapped)
+    /// - `block`: the callable to wrap and execute
+    ///
     /// Usage example:
     /// ```
-    /// # use context_manager::SyncWrapContext;
+    /// # use context_manager::{CallerContext, SyncWrapContext};
     /// struct PrintDuration;
     /// impl<T> SyncWrapContext<T> for PrintDuration {
     ///   fn new() -> Self { Self }
     /// }
     ///
     /// # async fn foo() {
-    /// let async_run_output: &'static str = PrintDuration::run_sync(|| {
+    /// let async_run_output: &'static str = PrintDuration::run_sync(CallerContext::new("manual"), || {
     ///     "sync"
     /// });
     /// # }
     /// ```
-    fn run_sync(block: impl FnOnce() -> T) -> T
+    fn run_sync(caller_context: CallerContext, block: impl FnOnce() -> T) -> T
     where
         Self: Sized,
     {
         let context = Self::new();
-        context.before();
+        context.before(&caller_context);
         let result = block();
-        context.after(&result);
+        context.after(&caller_context, &result);
         result
     }
 
@@ -96,35 +110,42 @@ pub trait SyncWrapContext<T> {
     ///
     /// This will lead to context initialisation and execution of before/after hooks
     ///
+    ///
+    /// Parameters:
+    /// - `caller_context`: Context of the caller (including the name of the function that is being wrapped)
+    /// - `block`: the future to wrap and execute
+    ///
     /// Usage example:
     /// ```
-    /// # use context_manager::SyncWrapContext;
+    /// # use context_manager::{CallerContext, SyncWrapContext};
     /// struct PrintDuration;
     /// impl<T> SyncWrapContext<T> for PrintDuration {
     ///   fn new() -> Self { Self }
     /// }
     ///
     /// # async fn foo() {
-    /// let async_run_output: &'static str = PrintDuration::run_async(async {
+    /// let async_run_output: &'static str = PrintDuration::run_async(CallerContext::new("manual"), async {
     ///     "async"
     /// }).await;
     /// # }
     /// ```
     #[allow(async_fn_in_trait)]
-    async fn run_async(block: impl Future<Output = T>) -> T
+    async fn run_async(caller_context: CallerContext, block: impl Future<Output = T>) -> T
     where
         Self: Sized,
     {
         let context = Self::new();
-        context.before();
+        context.before(&caller_context);
         let result = block.await;
-        context.after(&result);
+        context.after(&caller_context, &result);
         result
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::CallerContext;
+
     use super::SyncWrapContext;
     use std::sync::atomic::AtomicUsize;
     use std::sync::atomic::Ordering;
@@ -139,22 +160,22 @@ mod tests {
                 Self
             }
 
-            fn before(&self) {
+            fn before(&self, _: &CallerContext) {
                 // Reset the value to 0
                 VALUE.store(0, Ordering::Relaxed);
                 // Which will be verified in the function execution
             }
 
-            fn after(self, result: &usize) {
+            fn after(self, _: &CallerContext, result: &usize) {
                 VALUE.store(2 * (*result), Ordering::Relaxed);
             }
         }
 
         assert_eq!(
-            Sync::run_sync(|| {
+            Sync::run_sync(CallerContext::new("test"), || {
                 assert_eq!(VALUE.load(Ordering::Relaxed), 0);
                 42
-            }),
+            },),
             42,
         );
 
@@ -172,22 +193,22 @@ mod tests {
                 Self
             }
 
-            fn before(&self) {
+            fn before(&self, _: &CallerContext) {
                 // Reset the value to 0
                 VALUE.store(0, Ordering::Relaxed);
                 // Which will be verified in the function execution
             }
 
-            fn after(self, result: &usize) {
+            fn after(self, _: &CallerContext, result: &usize) {
                 VALUE.store(2 * *result, Ordering::Relaxed);
             }
         }
 
         assert_eq!(
-            Sync::run_async(async {
+            Sync::run_async(CallerContext::new("test"), async {
                 assert_eq!(VALUE.load(Ordering::Relaxed), 0);
                 42
-            })
+            },)
             .await,
             42
         );
