@@ -32,6 +32,11 @@ jobs:
           echo "Version mismatch between the tag (${GITHUB_REF_NAME}) and the Cargo.toml (${versions})"
           exit 1
         fi
+        expectedSection="$(echo "${versions}" | head -n 1) ($(date --iso-8601))"
+        if [ ! grep -c "${expectedSection}" CHANGELOG.md ]; then
+          echo "Expected to have '${expectedSection}' in the CHANGELOG.md"
+          exit 1
+        fi
     - name: Build everything
       run: cargo build --all-targets
     - name: Test everything
