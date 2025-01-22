@@ -30,8 +30,8 @@ jobs:
       # This might be very aggressive and possibly with false positive, but that's the point
       run: cargo clippy -- -D clippy::pedantic
     - name: Build
-      run: cargo build --verbose
+      run: cargo build --all-targets --verbose
     - name: Build doc
-      run: cargo test --verbose
+      run: cargo doc --all-features
     - name: Run tests
-      run: cargo test --verbose
+      run: cargo test --all-targets --verbose

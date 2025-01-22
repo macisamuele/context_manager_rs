@@ -1,4 +1,4 @@
-name: Build and test
+name: Publish new version
 
 permissions:
   contents: read
@@ -19,7 +19,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Verify
+    - name: Verify versions
       # Version between context manager and context manager macro should be the same
       # And it should match the version on the tag
       run: |
@@ -32,6 +32,10 @@ jobs:
           echo "Version mismatch between the tag (${GITHUB_REF_NAME}) and the Cargo.toml (${versions})"
           exit 1
         fi
+    - name: Build everything
+      run: cargo build --all-targets
+    - name: Test everything
+      run: cargo test --all-targets
     - name: Publish context_manager_macro to crates.io
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
