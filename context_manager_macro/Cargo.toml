@@ -6,7 +6,6 @@ description = "Process macro for context_manager crate"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/macisamuele/context_manager_rs"
 documentation = "https://docs.rs/context_manager_macro"
-readme = "../README.md"
 
 [lib]
 proc-macro = true
