@@ -32,13 +32,13 @@ pub struct CallerContext {
 impl CallerContext {
     /// Create a new instance of the `CallerContext`
     #[must_use]
-    pub fn new(fn_name: &'static str) -> Self {
+    pub const fn new(fn_name: &'static str) -> Self {
         Self { fn_name }
     }
 
     /// Name of the wrapped function
     #[must_use]
-    pub fn fn_name(&self) -> &str {
+    pub const fn fn_name(&self) -> &'static str {
         self.fn_name
     }
 }
