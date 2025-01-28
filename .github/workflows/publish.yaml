@@ -23,6 +23,7 @@ jobs:
       # Version between context manager and context manager macro should be the same
       # And it should match the version on the tag
       run: |
+        set -x
         versions="$(cargo metadata --format-version=1 | jq -r '.packages[] | select((.name == "context_manager") or (.name == "context_manager_macro")) | .version' | sort -u)"
         if [ "$(echo "${versions}" | wc -l)" -ne 1 ]; then
           echo "Version mismatch between context_manager and context_manager_macro"
@@ -33,7 +34,7 @@ jobs:
           exit 1
         fi
         expectedSection="$(echo "${versions}" | head -n 1) ($(date --iso-8601))"
-        if [ ! grep -c "${expectedSection}" CHANGELOG.md ]; then
+        if ! grep --count --quiet "${expectedSection}" CHANGELOG.md; then
           echo "Expected to have '${expectedSection}' in the CHANGELOG.md"
           exit 1
         fi
