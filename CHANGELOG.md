@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.1.3 (2025-01-??)
+0.1.3 (2025-01-28)
 ------------------
 
 * Update [`CallerContext`] APIs to be const and [`CallerContext::fn_name`] returns `&'static str`
