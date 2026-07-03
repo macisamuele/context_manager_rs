@@ -59,7 +59,7 @@ pub fn wrap(attr: TokenStream, item: TokenStream) -> TokenStream {
             parse_quote!(::std::compile_error!("#[wrap] cannot operate on const functions.");),
         );
         return quote! { #in_func }.into();
-    };
+    }
 
     let args: Args = parse_macro_input!(attr);
 
@@ -109,7 +109,7 @@ pub fn async_wrap(attr: TokenStream, item: TokenStream) -> TokenStream {
             parse_quote!(::std::compile_error!("#[wrap] cannot operate on const functions.");),
         );
         return quote! { #in_func }.into();
-    };
+    }
 
     let args: Args = parse_macro_input!(attr);
 
@@ -135,7 +135,7 @@ pub fn async_wrap(attr: TokenStream, item: TokenStream) -> TokenStream {
                 "#[async_wrap] cannot operate on sync functions. Please consider using a #[wrap] macro or converting/wrapping the function to be async."
             )})
         );
-    };
+    }
 
     quote! { #in_func }.into()
 }
