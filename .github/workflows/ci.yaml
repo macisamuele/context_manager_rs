@@ -9,6 +9,9 @@ on:
     branches: [ "main" ]
   push:
     branches: [ "main" ]
+  schedule:
+    # Run weekly (Monday 06:00 UTC) to catch breakage from dependency or toolchain drift
+    - cron: '0 6 * * 1'
 
 env:
   CARGO_TERM_COLOR: always
